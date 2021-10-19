@@ -24,7 +24,7 @@ listToLines :: Tablero -> [Char]
 listToLines tablero =
   let x = tablero
       accumulate acc el
-        | null el = acc ++ "□"
+        | null el || head el == 'F' = acc ++ "□"
         | head el == 'X' || head el == 'O' = acc ++ [head el]
       x1 = foldl' accumulate "" x
       x2 = foldl' accumulate "" $ map rex x
@@ -61,15 +61,15 @@ next marca
   | marca == X = O
   | marca == O = X
 
-checkFour :: Eq a => [a] -> Bool
+checkFour :: [Char] -> Bool
 checkFour (x : y : z : t : rest)
-  | not (null [x, y, z, t]) && (x == y && y == z && z == t) = True
+  | not (null [x, y, z, t]) && (x == y && y == z && z == t) && (x /= 'F' ) = True
   | otherwise = checkFour (y : z : t : rest)
 checkFour _ = False
 
 checkWin :: Tablero -> Bool
 checkWin tab
-  | any checkFour $ tab ++ transpose tab = True
+  | any checkFour $ tab ++ transpose tab ++ diagonals (map filler tab) = True
   | otherwise = False
 
 muestraGanador :: Marca -> String
@@ -77,6 +77,15 @@ muestraGanador marca
   | marca == X = "Gano X"
   | marca == O = "Gano O"
 
+diagonals :: [[a]] -> [[a]]
+diagonals []       = []
+diagonals (xs:xss) = takeWhile (not . null) $
+    zipWith (++) (map (:[]) xs ++ repeat [])
+                 ([]:diagonals xss)
+filler :: [Char] -> [Char]
+filler col
+  | length col == 6 = col
+  | otherwise = filler $ col ++ "F"
 -- main :: IO b
 main =
   do
