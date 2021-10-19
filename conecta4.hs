@@ -102,7 +102,6 @@ main =
     play X 0 tableroInicial
   where
     play marca col tablero = do
-      putStrLn "Tablero normal"
       putStrLn (muestraTablero tablero)
       if checkWin tablero
         then putStrLn (muestraGanador (next marca))
@@ -110,4 +109,9 @@ main =
           putStrLn "Movimiento jugador:"
           print marca
           l <- getLine
-          play (next marca) (read l :: Int) $ push (read l :: Int) marca tablero
+          case filter (\(_, s) -> s == "") (reads l :: [(Int, String)]) of
+            [] -> do
+              putStrLn "Movimiento invalido\n"
+              play marca col tablero
+            (xAsInt, _) : _ ->
+              play (next marca) (read l :: Int) $ push (read l :: Int) marca tablero
