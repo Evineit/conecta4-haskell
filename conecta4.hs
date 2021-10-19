@@ -69,7 +69,7 @@ checkFour _ = False
 
 checkWin :: Tablero -> Bool
 checkWin tab
-  | any checkFour $ tab ++ transpose tab ++ diagonals (map filler tab) = True
+  | any checkFour $ tab ++ transpose tab ++ diagonals (map filler tab) ++ diagonals (rotl (map filler tab)) = True
   | otherwise = False
 
 muestraGanador :: Marca -> String
@@ -82,11 +82,15 @@ diagonals []       = []
 diagonals (xs:xss) = takeWhile (not . null) $
     zipWith (++) (map (:[]) xs ++ repeat [])
                  ([]:diagonals xss)
+
+rotl :: [[x]] -> [[x]]
+rotl = transpose . map reverse
+
 filler :: [Char] -> [Char]
 filler col
   | length col == 6 = col
   | otherwise = filler $ col ++ "F"
--- main :: IO b
+
 main =
   do
     hSetBuffering stdout NoBuffering
@@ -94,11 +98,13 @@ main =
     play X 0 tableroInicial
   where
     play marca col tablero = do
+      putStrLn "Tablero normal"
       putStrLn (muestraTablero tablero)
       if checkWin tablero
         then putStrLn (muestraGanador (next marca))
         else do
-          putStrLn $ show tablero
+          -- putStrLn $ show $diagonals $ map filler tablero
+          -- putStrLn $ show $diagonals $rotl $ map filler tablero
           putStrLn "Movimiento jugador:"
           print marca
           l <- getLine
