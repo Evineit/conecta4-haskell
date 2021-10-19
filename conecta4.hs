@@ -63,7 +63,7 @@ next marca
 
 checkFour :: [Char] -> Bool
 checkFour (x : y : z : t : rest)
-  | not (null [x, y, z, t]) && (x == y && y == z && z == t) && (x /= 'F' ) = True
+  | not (null [x, y, z, t]) && (x == y && y == z && z == t) && (x /= 'F') = True
   | otherwise = checkFour (y : z : t : rest)
 checkFour _ = False
 
@@ -78,10 +78,13 @@ muestraGanador marca
   | marca == O = "Gano O"
 
 diagonals :: [[a]] -> [[a]]
-diagonals []       = []
-diagonals (xs:xss) = takeWhile (not . null) $
-    zipWith (++) (map (:[]) xs ++ repeat [])
-                 ([]:diagonals xss)
+diagonals [] = []
+diagonals (xs : xss) =
+  takeWhile (not . null) $
+    zipWith
+      (++)
+      (map (: []) xs ++ repeat [])
+      ([] : diagonals xss)
 
 rotl :: [[x]] -> [[x]]
 rotl = transpose . map reverse
@@ -91,6 +94,7 @@ filler col
   | length col == 6 = col
   | otherwise = filler $ col ++ "F"
 
+main :: IO ()
 main =
   do
     hSetBuffering stdout NoBuffering
@@ -103,8 +107,6 @@ main =
       if checkWin tablero
         then putStrLn (muestraGanador (next marca))
         else do
-          -- putStrLn $ show $diagonals $ map filler tablero
-          -- putStrLn $ show $diagonals $rotl $ map filler tablero
           putStrLn "Movimiento jugador:"
           print marca
           l <- getLine
