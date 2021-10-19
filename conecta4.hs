@@ -25,8 +25,7 @@ marcadorInicial = Tab [] []
 tableroInicial :: [[a]]
 tableroInicial = replicate 7 []
 
-tableroPrueba = tableroInicial
-
+push :: Show p => Int -> p -> [[Char]] -> [[Char]]
 push columna marca tablero
   | columna < 1 || columna > 7 = tablero
   | otherwise = y ++ x
@@ -48,27 +47,37 @@ listToLines l =
 -- >>> listToLines tableroInicial
 -- []
 
-getRows :: Marcador -> Posiciones
-getRows (Tab row columns) = row
+listToLines :: [[Char]] -> [Char]
+listToLines tablero =
+  let x = tablero
+      accumulate acc el
+        | null el = acc ++ "□"
+        | head el == 'X' || head el == 'O' = acc ++ [head el]
+      x1 = foldl' accumulate "" x
+      x2 = foldl' accumulate "" $ map rex x
+      x3 = foldl' accumulate "" $ map (rex . rex) x
+      x4 = foldl' accumulate "" $ map (rex . rex . rex) x
+      x5 = foldl' accumulate "" $ map (rex . rex . rex . rex) x
+      x6 = foldl' accumulate "" $ map (rex . rex . rex . rex . rex) x
+      j s = "[" ++ s ++ "]"
+   in intercalate "\n" $ map (j . intersperse ',') [x6, x5, x4, x3, x2, x1]
 
-muestraLinea :: Marcador -> [Posicion] -> String
-muestraLinea t =
-  intercalate " | " . map (muestraPosicion t)
-
--- >>> getRows marcadorInicial
--- []
+rex :: [a] -> [a]
+rex col
+  | null col = col
+  | otherwise = tail col
 
 -- >>> muestraTablero marcadorInicial
 -- "Numero de columna\n{1,2,3,4,5,6,7}\n--------------------\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n--------------------\n"
 
-muestraTablero :: Marcador -> String
-muestraTablero marcador =
+muestraTablero :: [[Char]] -> [Char]
+muestraTablero tablero =
   "Numero de columna\n"
     ++ "{"
     ++ intercalate "," (map show [1 .. 7])
     ++ "}\n"
     ++ getSeparator
-    ++ intercalate "\n" (replicate 6 (show (replicate 7 0)))
+    ++ listToLines tablero
     ++ "\n"
     ++ getSeparator
 
@@ -77,17 +86,21 @@ getSeparator =
   do
     concat (replicate 20 "-") ++ "\n"
 
-play :: IO ()
-play =
-  do
-    putStrLn "Juego"
+next :: Marca -> Marca
+next marca
+  | marca == X = O
+  | marca == O = X
 
-main :: IO ()
+main :: IO b
 main =
   do
     hSetBuffering stdout NoBuffering
     putStrLn "Conecta 4 | 2 jugadores"
-    putStrLn (muestraTablero marcadorInicial)
-    putStrLn "Comienza el juego ? (s/n)"
+    play X 0 tableroInicial
+  where
+    play marca col tablero = do
+      putStrLn (muestraTablero tablero)
+      putStrLn "Movimiento jugador:"
+      print marca
     l <- getLine
-    play
+      play (next marca) (read l :: Int) $ push (read l :: Int) marca tablero
