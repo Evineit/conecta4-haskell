@@ -28,11 +28,11 @@ tableroInicial = replicate 7 []
 tableroPrueba = tableroInicial
 
 push columna marca tablero
-  | columna < 0 || columna >= 7 = tablero
+  | columna < 1 || columna > 7 = tablero
   | otherwise = y ++ x
   where
     (i, x) = splitAt columna tablero
-    y = tail (reverse i) ++ [last i ++ show marca]
+    y = init i ++ [last i ++ show marca]
 
 test =
   push 2 X $ push 2 O tableroInicial
