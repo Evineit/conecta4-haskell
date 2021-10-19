@@ -1,26 +1,13 @@
 import Control.Monad
 import Data.Array
 import Data.List
+import Data.Map (Map)
 import System.IO
 
-type Posicion = Int
-
-type Posiciones = [Posicion]
-
-data Marcador = Tab Posiciones Posiciones
-  deriving (Show)
+type Tablero = [[Char]]
 
 data Marca = X | O
   deriving (Show, Eq)
-
-muestraPosicion :: Marcador -> Posicion -> String
-muestraPosicion (Tab xs os) p
-  | p `elem` xs = "X"
-  | p `elem` os = "O"
-  | otherwise = show p
-
-marcadorInicial :: Marcador
-marcadorInicial = Tab [] []
 
 tableroInicial :: [[a]]
 tableroInicial = replicate 7 []
@@ -33,21 +20,7 @@ push columna marca tablero
     (i, x) = splitAt columna tablero
     y = init i ++ [last i ++ show marca]
 
-test =
-  push 2 X $ push 2 O tableroInicial
-
-listToLines l =
-  []
-
--- tableroMod =
--- map listToLines tableroPrueba
-
--- >>> tableroInicial
--- [[],[],[],[],[],[],[]]
--- >>> listToLines tableroInicial
--- []
-
-listToLines :: [[Char]] -> [Char]
+listToLines :: Tablero -> [Char]
 listToLines tablero =
   let x = tablero
       accumulate acc el
@@ -66,9 +39,6 @@ rex :: [a] -> [a]
 rex col
   | null col = col
   | otherwise = tail col
-
--- >>> muestraTablero marcadorInicial
--- "Numero de columna\n{1,2,3,4,5,6,7}\n--------------------\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n[0,0,0,0,0,0,0]\n--------------------\n"
 
 muestraTablero :: [[Char]] -> [Char]
 muestraTablero tablero =
@@ -91,7 +61,23 @@ next marca
   | marca == X = O
   | marca == O = X
 
-main :: IO b
+checkFour :: Eq a => [a] -> Bool
+checkFour (x : y : z : t : rest)
+      | not (null [x,y,z,t]) && (x == y && y == z && z == t) = True
+      | otherwise = checkFour (y : z : t : rest)
+checkFour _ = False
+
+checkWin :: Tablero -> Bool
+checkWin tab
+  | any checkFour tab = True
+  | otherwise = False
+
+muestraGanador :: Marca -> String
+muestraGanador marca
+  | marca == X = "Gano X"
+  | marca == O = "Gano O"
+
+-- main :: IO b
 main =
   do
     hSetBuffering stdout NoBuffering
@@ -100,7 +86,11 @@ main =
   where
     play marca col tablero = do
       putStrLn (muestraTablero tablero)
-      putStrLn "Movimiento jugador:"
-      print marca
-    l <- getLine
-      play (next marca) (read l :: Int) $ push (read l :: Int) marca tablero
+      if checkWin tablero
+        then putStrLn (muestraGanador (next marca))
+        else do
+          putStrLn $ show tablero
+          putStrLn "Movimiento jugador:"
+          print marca
+          l <- getLine
+          play (next marca) (read l :: Int) $ push (read l :: Int) marca tablero

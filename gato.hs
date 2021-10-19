@@ -39,6 +39,7 @@ tieneGanador (Tab xs os ) = tieneLinea xs || tieneLinea os
 
 data Arbol a = Nodo a [Arbol a]
 
+muestraArbol :: Show a => Arbol a -> [Char]
 muestraArbol (Nodo x xs ) =
     show x ++ '\n' : (unlines . map ("  "++) . concatMap (lines . show)) xs
 
