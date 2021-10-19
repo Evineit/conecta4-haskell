@@ -63,13 +63,13 @@ next marca
 
 checkFour :: Eq a => [a] -> Bool
 checkFour (x : y : z : t : rest)
-      | not (null [x,y,z,t]) && (x == y && y == z && z == t) = True
-      | otherwise = checkFour (y : z : t : rest)
+  | not (null [x, y, z, t]) && (x == y && y == z && z == t) = True
+  | otherwise = checkFour (y : z : t : rest)
 checkFour _ = False
 
 checkWin :: Tablero -> Bool
 checkWin tab
-  | any checkFour tab = True
+  | any checkFour $ tab ++ transpose tab = True
   | otherwise = False
 
 muestraGanador :: Marca -> String
